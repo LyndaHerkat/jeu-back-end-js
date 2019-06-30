@@ -1,0 +1,13 @@
+include includes/head.pug
+
+form#loginForm(action="/inscription/check" method="post")
+    p
+        label(for="login-id") Identifiant
+    p
+        input#loginID(type="text", name="login-id")
+    p
+        label(for="login-password") Mot de passe
+    p
+        input#loginPassword(type="password", name="login-password")
+    p
+        input(type="submit", value="Envoyer")
