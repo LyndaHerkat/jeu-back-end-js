@@ -9,12 +9,12 @@ var state = {
     client: null,
 };
 
-exports.connectClientMongo = function (url, option, done) {
+exports.connectClientMongo = function (uri, option, done) {
     if (state.client) {
         return done();
     }
 
-    MongoClient.connect(url, option, function (err, client) {
+    MongoClient.connect(uri , option, function (err, client) {
         if (err) {
             return done(err);
         }

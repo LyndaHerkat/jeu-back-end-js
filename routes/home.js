@@ -5,7 +5,6 @@ let router = express.Router();
 
 // let pug = require('pug');
 // let bodyParser = require('body-parser');
-// let cookieParser = require('cookie-parser');
 // let session = require('express-session');
 
 // let mongodb = require('mongodb');

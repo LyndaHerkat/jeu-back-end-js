@@ -1,6 +1,4 @@
 'use strict';
-console.log('coucou');
-
 
 /************************************************************************/
 /***************************** Sevreur HTTP *****************************/
@@ -9,13 +7,13 @@ let express = require('express');
 let app = express();
 let pug = require('pug');
 let bodyParser = require('body-parser');
-// let cookieParser = require('cookie-parser');
 let session = require('express-session');
+let MongoStore = require('connect-mongo')(session);
 
 let mongodb = require('mongodb');
 let MongoClient = mongodb.MongoClient;
 let objectId = require('mongodb').ObjectID;
-let dbTools = require ('./my_modules/db');
+// let dbTools = require ('./my_modules/db');
 
 
 
@@ -29,21 +27,38 @@ app.use(bodyParser.urlencoded({
 
 //Session
 app.use(session({
-    secret: 'my secret text',
-    resave: false,
-    saveUninitialized: true
+    secret : 'jeubackendifocop',
+    resave : false, //pas de re enregisrtement de la session (preconisé par connect-mongo)
+    saveUninitialized : true, //
+    cookie : {
+        maxAge : 7 * 24 * 60 * 60, // 7 jours
+        httpOnly : true , //permet de rendre invisible le cookie coté client
+        secure : false // permet de l'envoi du cookie meem si pas en https
+    },
+    store : new MongoStore({
+        url : 'mongodb+srv://lynda_admin:ugdyEBGb64bug44X@clusterquizz-2hfjf.mongodb.net/users?retryWrites=true&w=majority',// on specifie dans L'URI la database ou la colelction sessions sera creee
+        ttl : 7 * 24 * 60 * 60 // 7jours
+    })
 }));
 
 //Moteur de rendu
 app.set('view engine', 'pug');
 
-let routerHome = require('./routes/home.js');
-let routerLogin = require('./routes/login-check.js');
-
-
 //Gestion des routes
-app.use('/', routerHome);
-app.use('/', routerLogin);
+app.use('/', require('./routes/home.js'));
+app.use('/', require('./routes/login-check.js'));
+app.use('/', require('./routes/signin-check.js'));
+app.get('/deconnexion', function(req,res){
+    //Destruction de la session
+    if (req.session.user_id){
+        
+        req.session.destroy();
+        res.redirect('/');
+
+    } else {
+        res.redirect('/');
+    }
+});
 
 
 //Variable de transfert de donnes entre le serveur et les vues pour les erreurs uniqument(après toutes les routes)

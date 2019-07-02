@@ -1,13 +1,38 @@
 include includes/head.pug
 
-form#loginForm(action="/inscription/check" method="post")
-    p
+h2 Connection
+
+if messageLogin
+    p.messageLogin.error #{messageLogin}
+
+form#login-form(action="/connexion/check" method="post")
+    div
         label(for="login-id") Identifiant
-    p
-        input#loginID(type="text", name="login-id")
-    p
+    div
+        input#login-id(type="text", name="login-id")
+    div
         label(for="login-password") Mot de passe
-    p
-        input#loginPassword(type="password", name="login-password")
-    p
+        
+    div
+        input#login-password(type="password", name="login-password")
+    div
         input(type="submit", value="Envoyer")
+
+h2 Inscription
+
+form#signin-form(action="/inscription/check" method="post")
+    div
+        label(for="signin-id") Identifiant
+    div
+        input#signin-id(type="text", name="signin-id")
+        p.messageSignin
+    div
+        label(for="signin-password") Mot de passe
+        
+    div
+        input#signin-password(type="password", name="signin-password")
+        p.messageSignin
+    div
+        input(type="submit", value="Envoyer")
+
+include includes/footer.pug
