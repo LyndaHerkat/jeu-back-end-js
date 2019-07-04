@@ -17,6 +17,7 @@ let objectId = require('mongodb').ObjectID;
 
 
 
+
 //Acces aux ressources statiques
 app.use('/public', express.static(__dirname + '/public'));
 
@@ -48,6 +49,7 @@ app.set('view engine', 'pug');
 app.use('/', require('./routes/home.js'));
 app.use('/', require('./routes/login-check.js'));
 app.use('/', require('./routes/signin-check.js'));
+app.use('/', require('./routes/quiz-home.js'));
 app.get('/deconnexion', function(req,res){
     //Destruction de la session
     if (req.session.user_id){
@@ -60,7 +62,6 @@ app.get('/deconnexion', function(req,res){
     }
 });
 
-
 //Variable de transfert de donnes entre le serveur et les vues pour les erreurs uniqument(après toutes les routes)
 let dataBox;
 app.use(function (req, res, next) {
@@ -72,7 +73,7 @@ app.use(function (req, res, next) {
 app.use(function (req, res, next) {
     res.status(404);
     next(new Error());
-})
+});
 
 app.use(function (err, req, res, next) {
     if (res.statusCode === 404) {
@@ -94,6 +95,10 @@ app.use(function (err, req, res, next) {
 
 
 //Ecoute serveur
-let srever = app.listen(8080, function () {
+let myServer = app.listen(8080, function () {
     console.log('Écoute sur le port 8080');
 });
+
+
+
+
