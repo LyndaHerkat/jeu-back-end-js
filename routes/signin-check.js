@@ -11,11 +11,9 @@ let dataBox = {}; //on vide dataBox a chaque requete
 
 router.all('/inscription/check', function (req, res, next) {
 
-    let URI = 'mongodb+srv://lynda_admin:ugdyEBGb64bug44X@clusterquizz-2hfjf.mongodb.net/test?retryWrites=true&w=majority';
-
     //Requete AJAX pour tester la presence de l'identifiant lors du sign-in
     if (req.xhr) {
-        dbTools.connectClientMongo(URI, {
+        dbTools.connectClientMongo(dbtools.URI, {
             useNewUrlParser: true
         }, function (err) {
             if (err) {
@@ -49,7 +47,7 @@ router.all('/inscription/check', function (req, res, next) {
             date : new Date()
         }
 
-        dbTools.connectClientMongo(URI, {
+        dbTools.connectClientMongo(dbTools.URI, {
             useNewUrlParser: true
         }, function (err) {
             if (err) {
@@ -72,25 +70,18 @@ router.all('/inscription/check', function (req, res, next) {
                                 next(err);
                             } else {
                                 // ajout des _id et nom du joueur dans la session
-
                                 req.session.user_id = result.ops[0]._id;
                                 req.session.pseudo = result.ops[0].pseudo;
-
-                                
                                 res.redirect('/quiz/accueil');
 
                             }
                             dbTools.closeClientMongo();
-
                         });
                     }
                 });
-
             }
         });
-
     }
-
 });
 
 

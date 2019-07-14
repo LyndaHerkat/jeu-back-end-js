@@ -2,9 +2,20 @@ include includes/head.pug
 
 p Bonjour #{session.pseudo}
 
-a(href="/quiz/attente") Quizz
-a(href="/mon-compte") Mon compte
-a(href="/classement") Classement
-a(href="/deconnexion") Déconnexion
+ul
+    li
+        a(href="/quiz/attente") Quizz
+    li
+        a(href="/mon-compte") Mon compte
+    li
+        a(href="/classement") Classement
+    li
+        a(href="/deconnexion") Déconnexion
 
+
+
+h2 Joueurs connectés
+div#players-connected
+
+script(src="/public/js/lobby.js")
 include includes/footer.pug

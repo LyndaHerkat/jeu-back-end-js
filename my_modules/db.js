@@ -39,3 +39,4 @@ exports.closeClientMongo = function (done) {
     };
 };
 
+exports.URI = 'mongodb+srv://lynda_admin:ugdyEBGb64bug44X@clusterquizz-2hfjf.mongodb.net/test?retryWrites=true&w=majority';

@@ -9,13 +9,8 @@ let dbTools = require('../my_modules/db');
 let dataBox = {}; //on vide dataBox a chaque requete
 
 router.post('/connexion/check', function (req, res, next) {
-    //Verification des identifiants de connections
-    
-    console.log("TCL: req.body", req.body)
 
-    let URI = 'mongodb+srv://lynda_admin:ugdyEBGb64bug44X@clusterquizz-2hfjf.mongodb.net/test?retryWrites=true&w=majority';
-
-    dbTools.connectClientMongo(URI, {
+    dbTools.connectClientMongo(dbTools.URI, {
         useNewUrlParser: true
     }, function (err) {
         if (err) {
@@ -43,7 +38,8 @@ router.post('/connexion/check', function (req, res, next) {
                         // ajout des _id et nom du joueur dans la session
                         req.session.user_id = documents[0]._id;
                         req.session.pseudo = documents[0].pseudo;
-
+                        req.session.sessionID = req.sessionID;
+                        req.session.ioID = req.cookies.io;
                         res.redirect('/quiz/accueil');
                     }
                 }

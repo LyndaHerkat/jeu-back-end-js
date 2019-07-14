@@ -21,7 +21,7 @@ window.addEventListener('DOMContentLoaded', function () {
     $signInForm.submit(function (e) {
 
         //Requete ajax pour verifier l'absence du nouvel identifiant dans la base de données.
-        let tabUsers = [];
+        let tabUsers = [];        
 
         if (formValidation === false) {
 
@@ -69,9 +69,10 @@ window.addEventListener('DOMContentLoaded', function () {
             console.log("TCL: formValidation", formValidation);
 
             if (formValidation) {
-                console.log('Formulaire valide');
-                console.log("TCL: this", this)
-                $signInForm.submit();
+
+                // console.log('Formulaire valide');
+                // console.log("TCL: this", this)
+                // $signInForm.submit();
             }
         }
 
