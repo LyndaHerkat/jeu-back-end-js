@@ -10,7 +10,7 @@ ul
     li
         a(href="/classement") Classement
     li
-        a(href="/deconnexion") Déconnexion
+        a.deconnection(href="/deconnexion") Déconnexion
 
 h2 Joueurs connectés
 div#players-connected
@@ -20,6 +20,18 @@ div#players-ready
 
 a.ready Rejoindre la partie
 p.wait En attente d'un second joueur ...
+p.count
+
+p.chrono temps écoulé
+    span.seconds
+    span secondes
+
+p.question
+p.answer-a
+p.answer-b
+p.answer-c
+p.answer-d
+
 
 script(src="/public/js/lobby.js")
 include includes/footer.pug
