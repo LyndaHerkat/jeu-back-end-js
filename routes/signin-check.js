@@ -13,7 +13,7 @@ router.all('/inscription/check', function (req, res, next) {
 
     //Requete AJAX pour tester la presence de l'identifiant lors du sign-in
     if (req.xhr) {
-        dbTools.connectClientMongo(dbtools.URI, {
+        dbTools.connectClientMongo(dbTools.URI, {
             useNewUrlParser: true
         }, function (err) {
             if (err) {
@@ -72,6 +72,8 @@ router.all('/inscription/check', function (req, res, next) {
                                 // ajout des _id et nom du joueur dans la session
                                 req.session.user_id = result.ops[0]._id;
                                 req.session.pseudo = result.ops[0].pseudo;
+                                req.session.sessionID = req.sessionID;
+                                req.session.ioID = req.cookies.io;
                                 res.redirect('/quiz/accueil');
 
                             }

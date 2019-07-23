@@ -30,7 +30,7 @@ const sessionMiddleware = session({
     saveUninitialized: true, //
     cookie: {
         maxAge: 7 * 24 * 60 * 60, // 7 jours
-        httpOnly: true, //permet de rendre invisible le cookie coté client
+        httpOnly: false, //permet de rendre invisible le cookie coté client
         secure: false // permet de l'envoi du cookie meem si pas en https
     },
     store: new MongoStore({
@@ -117,8 +117,8 @@ myServer.listen(8080, function () {
 let playersAvailable = []; // tableau contenant un objet par joueur (caracteristique)
 let playersAvailableList = []; // Joueurs connectes (username)
 let playersReadyToPlayList = []; // Joueurs prets à jouer (userID ?? a definir)
-let roomsList = [];
-let pending_room = null;
+let roomsList = {}; //Info de la partie en cours (nom de la room, joueurs, questions)
+let pending_room = null; // room en attente d'un second joueur
 let roomID = function () {
     return 'room_' + Math.random().toString(36).substr(2, 9);
 };
@@ -132,7 +132,7 @@ let Player = function (sessionID, username, user_id, socketID) {
     this.score = 0;
 };
 
-//Debut de la connection websocket
+//Connection websocket
 io.on('connection', function (socketServer) {
 
     //Creation de l'objet joueur avec toutes ses caracteristiques
@@ -163,23 +163,25 @@ io.on('connection', function (socketServer) {
                 playersAvailableList.splice(playersAvailableList.indexOf(player_username), 1);
                 io.emit('playersAvailableList', playersAvailableList);
             }
-
         }
         console.log("TCL: playersAvailable apres déconnection de ", player_username, playersAvailable);
         console.log("TCL: playersAvailableList apres déconnection", playersAvailableList);
-
     });
 
     //Rejoindre une partie
     socketServer.on('ready', function () {
+        //atrribution d'un room aux joueurs pret à jouer
         if (pending_room === null) {
             pending_room = roomID();
-            roomsList.push(pending_room);
+            roomsList[pending_room] = {};
+            roomsList[pending_room].players = [];
         }
+        //Mise à jour des infos de la room
         socketServer.room = pending_room;
         socketServer.join(socketServer.room);
-        console.log("TCL: entree dans la room", socketServer.room)
+        roomsList[socketServer.room].players.push(player_username);
 
+        //Ouverture de la room
         playersReadyToPlayList.push(player_username);
         console.log("TCL: playersReadyToPlayList AVANT", playersReadyToPlayList)
         if (playersReadyToPlayList.length === 2) {
@@ -195,13 +197,13 @@ io.on('connection', function (socketServer) {
             console.log("TCL: roomsList", roomsList);
 
         } else {
-            socketServer.emit('wait');
+            socketServer.emit('wait', player_username);
         }
     });
 
-    //Conf chrono
+    //Lancement du chrono
     let timer;
-    let seconds = 11;
+    let seconds = 300;
     let chrono = function () {
         timer = setInterval(function () {
             seconds -= 1;
@@ -210,7 +212,9 @@ io.on('connection', function (socketServer) {
                     time: seconds
                 });
             } else {
+                stopGameSwitcher = true;
                 stopChrono();
+                stopGame();
             }
         }, 1000);
     };
@@ -221,12 +225,177 @@ io.on('connection', function (socketServer) {
         chrono();
     });
 
-    // console.log("socketServer.request.sessionID", socketServer.request.sessionID);
-    // console.log("socketServer.handshake.headers.cookie", socketServer.handshake.headers.cookie
-    // );
-    // console.log("socketServer.handshake.headers", socketServer.handshake.headers
-    // );
+    //Récupération du Quiz dans la base de données(choix aléatoire de la collection)
+    socketServer.on('startQuestions', function () {
+        if (roomsList[socketServer.room].players[0] === player_username) { //un seul joueur fait cette requete
+            dbTools.connectClientMongo(dbTools.URI, {
+                useNewUrlParser: true
+            }, function (err) {
+                if (err) {
+                    console.log('Impossible de se connecter au client Mongo');
+                    next(err);
+                } else {
+                    const myDb = dbTools.getClientMongo().db('questions');
+                    const myCollection = myDb.collection('quizz-culture');
+                    myCollection.aggregate([{
+                        $sample: {
+                            size: 1
+                        }
+                    }]).toArray(
+                        function (err, doc) {
+                            if (err) {
+                                console.log('impossible de se connecter à la collection quizz-culture');
+                                next(err);
+                            } else {
+                                //stockage des questions sur le serveur dans l'objet roomList
+                                roomsList[socketServer.room].quizz_id = objectId(doc[0]._id);
+                                roomsList[socketServer.room].quizzRound1 = doc[0].quizz['débutant'];
+                                roomsList[socketServer.room].quizzRound2 = doc[0].quizz['confirmé'];
+                                roomsList[socketServer.room].quizzRound3 = doc[0].quizz['expert'];
+                                console.log(player_username, 'recupere les questions ', 'roomsList', roomsList);
+                                io.to(socketServer.room).emit('startQuestions', getQuestion());
+                            }
+                        }
+                    );
+                }
+            });
+        }
+    });
 
-    // console.log("TCL: socketServer.id", socketServer.id)
+    //Envoi des questions
+    let questionNumber = 1;
+    let roundNumber = 1;
+    let roundText = 'quizzRound' + roundNumber;
+    let correction = {};
+    let stopGameSwitcher = false;
+
+    let getQuestion = function () {
+        let question = {
+            questionNumber: roomsList[socketServer.room][roundText][questionNumber - 1].id,
+            question: roomsList[socketServer.room][roundText][questionNumber - 1].question,
+            answersTab: roomsList[socketServer.room][roundText][questionNumber - 1].propositions,
+            round: roundText
+        };
+        return question;
+    };
+
+    socketServer.on('nextQuestion', function () {
+        console.log('next question pleeeeeeaaaase !!!');
+        console.log('questionNumber', questionNumber);
+        console.log('roundNumber', roundNumber);
+        console.log('roundText', roundText);
+        if (stopGameSwitcher === false) {
+            socketServer.emit('startQuestions', getQuestion());
+        }
+    });
+
+    //Verification reponse
+    socketServer.on('checkAnswer', function (answerToCheck) {
+        correction.answerRef = answerToCheck.id;
+        correction.littleStory = roomsList[socketServer.room][roundText][questionNumber - 1].anecdote;
+        correction.solution = roomsList[socketServer.room][roundText][questionNumber - 1]['réponse'];
+        getQuestion().answersTab.forEach(function (elmt) {
+            if (elmt === correction.solution) {
+                let tabAnswers = roomsList[socketServer.room][roundText][questionNumber - 1].propositions;
+                let index = tabAnswers.indexOf(elmt);
+                switch (index) {
+                    case 0:
+                        correction.goodAnswerRef = "answer-a";
+                        break;
+                    case 1:
+                        correction.goodAnswerRef = "answer-b";
+                        break;
+                    case 2:
+                        correction.goodAnswerRef = "answer-c";
+                        break;
+                    case 3:
+                        correction.goodAnswerRef = "answer-d";
+                        break;
+                }
+            }
+        });
+
+        if (answerToCheck.answer === roomsList[socketServer.room][roundText][questionNumber - 1]['réponse']) {
+            console.log('Bien joué !');
+            correction.result = 'right';
+            console.log("TCL: correction right answer", correction)
+            playersAvailable.forEach(function(elmt){
+                console.log("TCL: socketServer.request.session.ioID", socketServer.request.session.ioID)
+                for(var [key, value] of Object.entries(elmt)){
+                    console.log("TCL: key", key)
+                    console.log("TCL: value", value)
+                    if(value === socketServer.request.session.ioID){
+                        elmt.score ++;
+                        correction.score = elmt.score;
+                        console.log("TCL: elmt.score", elmt.score);
+                        socketServer.emit('rightAnswer', correction);
+                    }
+                }
+                console.log("TCL: elmt", elmt)
+            });
+        } else {
+            console.log('bouuuuhhhh');
+            correction.result = 'wrong';
+            console.log("TCL: correction wrong answer", correction)
+            socketServer.emit('wrongAnswer', correction);
+        }
+        questionNumber++;
+        if (questionNumber === 11){
+            questionNumber = 1;
+            roundNumber++;
+            if (roundNumber <= 3) {
+                roundText = roundText = 'quizzRound' + roundNumber;
+            } else {
+                stopGameSwitcher = true;
+                stopGame();
+                stopChrono();
+                //enregistrement des scores en base de données
+                // playersAvailable.forEach(function(elmt){
+                //     for(var [key, value] of Object.entries(elmt)){
+                //         console.log("TCL: key", key)
+                //         console.log("TCL: value", value)
+                //         if(value === socketServer.request.session.ioID){
+                //             dbTools.connectClientMongo(dbTools.URI, {
+                //                 useNewUrlParser: true
+                //             }, function (err) {
+                //                 if (err) {
+                //                     console.log('Impossible de se connecter au client Mongo');
+                //                     next(err);
+                //                 } else {
+                //                     const myDb = dbTools.getClientMongo().db('users');
+                //                     const myCollection = myDb.collection('credentials');
+                //                     myCollection.findOneAndUpdate({_id : elmt.scores}).toArray(
+                //                         function (err, doc) {
+                //                             if (err) {
+                //                                 console.log('impossible de se connecter à la collection quizz-culture');
+                //                                 next(err);
+                //                             } else {
+                                                
+                //                             }
+                //                         }
+                //                     );
+                //                 }
+                //             });
+                //         }
+                //     }
+                // });
+            }
+        }
+    });
+    let stopGame = function () {
+        io.to(socketServer.room).emit('stopGame');
+    };
 
 });
+
+
+
+
+
+
+// console.log("socketServer.request.sessionID", socketServer.request.sessionID);
+// console.log("socketServer.handshake.headers", socketServer.handshake.headers
+// );
+// console.log("socketServer.handshake.headers", player_username, socketServer.handshake.headers);
+// console.log("TCL: socketServer.request.session.ioID", socketServer.request.session.ioID)
+// console.log("TCL: socketServer.id", socketServer.id)

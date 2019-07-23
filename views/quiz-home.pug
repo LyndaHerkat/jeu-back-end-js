@@ -15,23 +15,35 @@ ul
 h2 Joueurs connectés
 div#players-connected
 
-h2 Joueurs prêts à jouer
+h2 Joueurs en attente d'un adversaire
 div#players-ready
 
 a.ready Rejoindre la partie
 p.wait En attente d'un second joueur ...
-p.count
+p.count Début du Quiz dans 
+    span.count 0
+    span s
 
-p.chrono temps écoulé
+p.chrono Timer 
     span.seconds
-    span secondes
+    span  secondes
+p.score Score : 
+    span.score 0
+    span /30
 
-p.question
-p.answer-a
-p.answer-b
-p.answer-c
-p.answer-d
-
+p.question Question N°
+    span.questionNumber
+    span /30 :
+    span.question
+p 
+    a#answer-a.answer(href="")
+p
+    a#answer-b.answer(href="")
+p
+    a#answer-c.answer(href="")
+p
+    a#answer-d.answer(href="")
+p.littleStory
 
 script(src="/public/js/lobby.js")
 include includes/footer.pug
