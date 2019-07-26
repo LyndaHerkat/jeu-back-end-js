@@ -12,6 +12,19 @@ ul
     li
         a.deconnection(href="/deconnexion") Déconnexion
 
+h2 10 dernières parties
+.script
+    each elmt in scoresTab
+        p #{elmt.date}
+        p #{elmt.scores[0].player}
+        p #{elmt.scores[0].score}
+        p VS
+        p #{elmt.scores[1].player}
+        p #{elmt.scores[1].score}
+        //- each value, key in elmt
+        //-     p #{value.date}
+        //-     p #{value.score}
+
 h2 Joueurs connectés
 div#players-connected
 
@@ -24,12 +37,24 @@ p.count Début du Quiz dans
     span.count 0
     span s
 
+div.final-score
+    p.winner-looser
+    div.player1
+        p.pseudo
+        p.score-aff
+        span points
+    div VS
+    div.player2
+        p.pseudo
+        p.score-aff
+        span points
+
 p.chrono Timer 
     span.seconds
     span  secondes
 p.score Score : 
     span.score 0
-    span /30
+    span /30 points
 
 p.question Question N°
     span.questionNumber

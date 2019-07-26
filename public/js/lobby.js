@@ -3,11 +3,8 @@
 window.addEventListener('DOMContentLoaded', function () {
 
     ///////LOBBY////////
-    $('p.wait').hide();
-    $('p.chrono').hide();
-    $('p.score').hide();
-    $('p.question').hide();
-    $('p.count').hide();
+    $('p.wait, p.chrono, p.score, p.question, p.count, div.final-score').hide();
+    
     var socketClient = io();
     //Affichage des joueurs connectes
     socketClient.on('playersAvailableList', function (data) {
@@ -34,11 +31,13 @@ window.addEventListener('DOMContentLoaded', function () {
     });
 
     //Attente d'un second joueur lobby
-    socketClient.on('wait', function (player_username) {
-        var pPlayerName = $("<p></p>").text(player_username);
-        $('div#players-ready').append(pPlayerName);
+    socketClient.on('wait', function () {
         $('p.wait').show();
         $('a.ready').hide();
+    });
+    socketClient.on('waitingPlayer', function (player_username) {
+        var pPlayerName = $("<p></p>").text(player_username);
+        $('div#players-ready').append(pPlayerName);
     });
 
     //Lancement du jeu + decompte + chrono 
@@ -64,8 +63,7 @@ window.addEventListener('DOMContentLoaded', function () {
     };
 
     socketClient.on('letsgo', function () {
-        $('p.wait').hide();
-        $('a.ready').hide();
+        $('p.wait, a.ready').hide();
         $('p.count').show();
         $('div#players-ready').empty();
         start();
@@ -83,9 +81,7 @@ window.addEventListener('DOMContentLoaded', function () {
         freezeClick = false;
         console.log("TCL: data (question)", data);
         round = data.round;
-        $('p.chrono').show();
-        $('p.score').show();
-        $('p.question').show();
+        $('p.chrono, p.score, p.question').show();
         $('span.questionNumber').html(data.questionNumber);
         $('span.question').html(data.question);
         $('a#answer-a').html(data.answersTab[0]).css('background-color', 'white');
@@ -142,9 +138,20 @@ window.addEventListener('DOMContentLoaded', function () {
 
     //Arret du jeu
     socketClient.on('stopGame', function () {
-        $('span.question').html('');
-        $('p.littleStory').html('');
-        $('a.answer').html('');
+        $('span.question, p.littleStory, a.answer').html('');
+    });
+    
+    //Affichage du score final
+    socketClient.on('finalScore', function(finalScores){
+        console.log("TCL: finalScores", finalScores);
+        $('div.final-score').show();
+        $('div.player1 p.pseudo').html(finalScores[0].player);
+        $('div.player2 p.pseudo').html(finalScores[1].player);
+        $('div.player1 p.score-aff').html(finalScores[0].score);
+        $('div.player2 p.score-aff').html(finalScores[1].score);
+        $('p.chrono, p.score, p.question').hide();
+        
+        
     });
 
 

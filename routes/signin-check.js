@@ -44,7 +44,8 @@ router.all('/inscription/check', function (req, res, next) {
         let user = {
             pseudo: req.body['signin-id'],
             password: req.body['signin-password'],
-            date : new Date()
+            date : new Date(),
+            scores : []
         }
 
         dbTools.connectClientMongo(dbTools.URI, {

@@ -7,6 +7,7 @@ const express = require('express');
 const app = express();
 const myServer = require('http').createServer(app);
 const io = require('socket.io')(myServer);
+const PORT = process.env.PORT || 8080;
 //DB
 const mongodb = require('mongodb');
 const MongoClient = mongodb.MongoClient;
@@ -104,7 +105,7 @@ app.use(function (err, req, res, next) {
 });
 
 //Ecoute serveur
-myServer.listen(8080, function () {
+myServer.listen(PORT, function () {
     console.log('Écoute sur le port 8080');
     console.log('playersAvailableList', playersAvailableList);
     console.log('playersAvailable ', playersAvailable);
@@ -175,6 +176,7 @@ io.on('connection', function (socketServer) {
             pending_room = roomID();
             roomsList[pending_room] = {};
             roomsList[pending_room].players = [];
+            roomsList[pending_room].scores = [];
         }
         //Mise à jour des infos de la room
         socketServer.room = pending_room;
@@ -197,13 +199,14 @@ io.on('connection', function (socketServer) {
             console.log("TCL: roomsList", roomsList);
 
         } else {
-            socketServer.emit('wait', player_username);
+            socketServer.emit('wait');
+            io.emit('waitingPlayer', player_username);
         }
     });
 
     //Lancement du chrono
     let timer;
-    let seconds = 300;
+    let seconds = 30;
     let chrono = function () {
         timer = setInterval(function () {
             seconds -= 1;
@@ -319,13 +322,13 @@ io.on('connection', function (socketServer) {
             console.log('Bien joué !');
             correction.result = 'right';
             console.log("TCL: correction right answer", correction)
-            playersAvailable.forEach(function(elmt){
+            playersAvailable.forEach(function (elmt) {
                 console.log("TCL: socketServer.request.session.ioID", socketServer.request.session.ioID)
-                for(var [key, value] of Object.entries(elmt)){
+                for (var [key, value] of Object.entries(elmt)) {
                     console.log("TCL: key", key)
                     console.log("TCL: value", value)
-                    if(value === socketServer.request.session.ioID){
-                        elmt.score ++;
+                    if (value === socketServer.request.session.ioID) {
+                        elmt.score++;
                         correction.score = elmt.score;
                         console.log("TCL: elmt.score", elmt.score);
                         socketServer.emit('rightAnswer', correction);
@@ -340,7 +343,7 @@ io.on('connection', function (socketServer) {
             socketServer.emit('wrongAnswer', correction);
         }
         questionNumber++;
-        if (questionNumber === 11){
+        if (questionNumber === 11) {
             questionNumber = 1;
             roundNumber++;
             if (roundNumber <= 3) {
@@ -349,41 +352,83 @@ io.on('connection', function (socketServer) {
                 stopGameSwitcher = true;
                 stopGame();
                 stopChrono();
-                //enregistrement des scores en base de données
-                // playersAvailable.forEach(function(elmt){
-                //     for(var [key, value] of Object.entries(elmt)){
-                //         console.log("TCL: key", key)
-                //         console.log("TCL: value", value)
-                //         if(value === socketServer.request.session.ioID){
-                //             dbTools.connectClientMongo(dbTools.URI, {
-                //                 useNewUrlParser: true
-                //             }, function (err) {
-                //                 if (err) {
-                //                     console.log('Impossible de se connecter au client Mongo');
-                //                     next(err);
-                //                 } else {
-                //                     const myDb = dbTools.getClientMongo().db('users');
-                //                     const myCollection = myDb.collection('credentials');
-                //                     myCollection.findOneAndUpdate({_id : elmt.scores}).toArray(
-                //                         function (err, doc) {
-                //                             if (err) {
-                //                                 console.log('impossible de se connecter à la collection quizz-culture');
-                //                                 next(err);
-                //                             } else {
-                                                
-                //                             }
-                //                         }
-                //                     );
-                //                 }
-                //             });
-                //         }
-                //     }
-                // });
             }
         }
     });
     let stopGame = function () {
+        console.log("TCL: stopGame -> roomsList[pending_room]", roomsList[pending_room])
+
+        // enregistrement du score perso en base de données (collection users)
+        playersAvailable.forEach(function (elmt) {
+            for (var [key, value] of Object.entries(elmt)) {
+                if (value === socketServer.request.session.ioID) {
+                    let user_id = objectId(elmt.user_id);
+                    let finalScore = elmt.score;
+                    roomsList[socketServer.room].scores.push({
+                        player : player_username,
+                        score : finalScore
+                    });
+                    console.log('Enregistrement score DB');
+                    dbTools.connectClientMongo(dbTools.URI, {
+                        useNewUrlParser: true
+                    }, function (err) {
+                        if (err) {
+                            console.log('Impossible de se connecter au client Mongo');
+                            next(err);
+                        } else {
+                            const myDb = dbTools.getClientMongo().db('users');
+                            const myCollection = myDb.collection('credentials');
+                            myCollection.findOneAndUpdate({
+                                _id: user_id
+                            }, {
+                                $push: {
+                                    scores: {
+                                        date: new Date(),
+                                        score: finalScore
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+        // enregistrement du score du match en base de données (collection games)
+        if (roomsList[socketServer.room].players[0] === player_username && roomsList[socketServer.room].scores.length === 2) { //un seul joueur fait cette requete ET si les scores des 2 joueurs sont disponibles
+
+            let records = {
+                date: new Date(),
+                scores: roomsList[socketServer.room].scores
+            }
+    
+            dbTools.connectClientMongo(dbTools.URI, {
+                useNewUrlParser: true
+            }, function (err) {
+                if (err) {
+                    console.log('Impossible de se connecter au client Mongo');
+                    next(err);
+                } else {
+                    const myDb = dbTools.getClientMongo().db('users');
+                    const myCollection = myDb.collection('games');
+    
+                    myCollection.insertOne(records, function (err, result) {
+                        if (err) {
+                            console.log('impossible de se connecter à la collection games');
+                            dbTools.closeClientMongo();
+                            next(err);
+                        } else {
+                            console.log("Enregistrement des scores dans la base de données");
+                            io.to(socketServer.room).emit('finalScore', roomsList[socketServer.room].scores);
+                        }
+                        dbTools.closeClientMongo();
+                    });
+                }
+            });
+        }
+
         io.to(socketServer.room).emit('stopGame');
+    
+        console.log("TCL: stopGame -> roomsList", roomsList);
     };
 
 });
