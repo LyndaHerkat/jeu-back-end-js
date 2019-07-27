@@ -4,6 +4,7 @@
   "description": "jeu quiz projet back end ifocop",
   "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "lynda herkat",
@@ -18,5 +19,8 @@
     "mongodb": "^3.2.7",
     "pug": "^2.0.4",
     "socket.io": "^2.2.0"
+  },
+  "engines": {
+    "node" : "10.15.3"
   }
 }

@@ -206,7 +206,7 @@ io.on('connection', function (socketServer) {
 
     //Lancement du chrono
     let timer;
-    let seconds = 30;
+    let seconds = 300;
     let chrono = function () {
         timer = setInterval(function () {
             seconds -= 1;
@@ -394,8 +394,12 @@ io.on('connection', function (socketServer) {
             }
         });
         // enregistrement du score du match en base de données (collection games)
-        if (roomsList[socketServer.room].players[0] === player_username && roomsList[socketServer.room].scores.length === 2) { //un seul joueur fait cette requete ET si les scores des 2 joueurs sont disponibles
-
+        
+        console.log("TCL: stopGame ->roomsList[socketServer.room].scores.length",roomsList[socketServer.room].scores.length)
+        console.log("  player_username",   player_username);
+        console.log("TCL: stopGame -> roomsList[socketServer.room].players[0]", roomsList[socketServer.room].players[0])
+        if (roomsList[socketServer.room].scores.length === 2) { //un seul joueur fait cette requete ET si les scores des 2 joueurs sont disponibles
+            console.log('coucou je suis entré', player_username)
             let records = {
                 date: new Date(),
                 scores: roomsList[socketServer.room].scores
