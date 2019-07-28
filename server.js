@@ -171,7 +171,7 @@ io.on('connection', function (socketServer) {
 
     //Rejoindre une partie
     socketServer.on('ready', function () {
-        //atrribution d'un room aux joueurs pret à jouer
+        //atrribution d'une room aux joueurs pret à jouer
         if (pending_room === null) {
             pending_room = roomID();
             roomsList[pending_room] = {};
@@ -190,7 +190,7 @@ io.on('connection', function (socketServer) {
             //Debut de l'echange dans la room
             io.to(socketServer.room).emit('letsgo');
 
-            // remise à zero du tableau des joueurs en attente de jouer 
+            // remise à zero du tableau des joueurs en attente de joueur 
             pending_room = null;
             playersReadyToPlayList = [];
             console.log("TCL: playersReadyToPlayList APRES", playersReadyToPlayList);
@@ -207,12 +207,23 @@ io.on('connection', function (socketServer) {
     //Lancement du chrono
     let timer;
     let seconds = 300;
+    let secondsToHms = function(d){
+        d = Number(d);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor(d % 3600 / 60);
+        var s = Math.floor(d % 3600 % 60);
+    
+        var hDisplay = h > 0 ? h + (h == 1 ? " : " : " : ") : "";
+        var mDisplay = m > 0 ? m + (m == 1 ? " : " : " : ") : "";
+        var sDisplay = s > 0 ? s + (s == 1 ? " : " : " ") : "";
+        return hDisplay + mDisplay + sDisplay; 
+    };
     let chrono = function () {
         timer = setInterval(function () {
             seconds -= 1;
             if (seconds >= 0) {
                 io.to(socketServer.room).emit('sendChrono', {
-                    time: seconds
+                    time: secondsToHms(seconds)
                 });
             } else {
                 stopGameSwitcher = true;
@@ -343,16 +354,17 @@ io.on('connection', function (socketServer) {
             socketServer.emit('wrongAnswer', correction);
         }
         questionNumber++;
-        if (questionNumber === 11) {
+        if (questionNumber === 11) {//11
             questionNumber = 1;
             roundNumber++;
-            if (roundNumber <= 3) {
-                roundText = roundText = 'quizzRound' + roundNumber;
-            } else {
-                stopGameSwitcher = true;
-                stopGame();
-                stopChrono();
-            }
+        }
+        if (roundNumber <= 3) {
+            roundText = roundText = 'quizzRound' + roundNumber;
+        }
+        if (roundNumber > 3){
+            stopGameSwitcher = true;
+            stopChrono();
+            stopGame();
         }
     });
     let stopGame = function () {
@@ -376,6 +388,10 @@ io.on('connection', function (socketServer) {
                             console.log('Impossible de se connecter au client Mongo');
                             next(err);
                         } else {
+                            let date = new Date();
+                            let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                            let dateString = date.toLocaleDateString('fr-FR', options);
+                            console.log("TCL: stopGame -> dateString", dateString)
                             const myDb = dbTools.getClientMongo().db('users');
                             const myCollection = myDb.collection('credentials');
                             myCollection.findOneAndUpdate({
@@ -383,7 +399,7 @@ io.on('connection', function (socketServer) {
                             }, {
                                 $push: {
                                     scores: {
-                                        date: new Date(),
+                                        date: dateString,
                                         score: finalScore
                                     }
                                 }
@@ -395,11 +411,7 @@ io.on('connection', function (socketServer) {
         });
         // enregistrement du score du match en base de données (collection games)
         
-        console.log("TCL: stopGame ->roomsList[socketServer.room].scores.length",roomsList[socketServer.room].scores.length)
-        console.log("  player_username",   player_username);
-        console.log("TCL: stopGame -> roomsList[socketServer.room].players[0]", roomsList[socketServer.room].players[0])
         if (roomsList[socketServer.room].scores.length === 2) { //un seul joueur fait cette requete ET si les scores des 2 joueurs sont disponibles
-            console.log('coucou je suis entré', player_username)
             let records = {
                 date: new Date(),
                 scores: roomsList[socketServer.room].scores
@@ -421,7 +433,6 @@ io.on('connection', function (socketServer) {
                             dbTools.closeClientMongo();
                             next(err);
                         } else {
-                            console.log("Enregistrement des scores dans la base de données");
                             io.to(socketServer.room).emit('finalScore', roomsList[socketServer.room].scores);
                         }
                         dbTools.closeClientMongo();

@@ -3,7 +3,7 @@
 window.addEventListener('DOMContentLoaded', function () {
 
     ///////LOBBY////////
-    $('p.wait, p.chrono, p.score, p.question, p.count, div.final-score').hide();
+    $('p.wait, p.chrono, p.score, p.question, p.count, div.final-score, div.questions').hide();
     
     var socketClient = io();
     //Affichage des joueurs connectes
@@ -50,7 +50,7 @@ window.addEventListener('DOMContentLoaded', function () {
         counter--;
         if (counter === 0) {
             finish();
-            $('span.count').html('GO');
+            $('p.count').html('GO');
             socketClient.emit('askChrono');
             socketClient.emit('startQuestions');
         } else {
@@ -66,11 +66,14 @@ window.addEventListener('DOMContentLoaded', function () {
         $('p.wait, a.ready').hide();
         $('p.count').show();
         $('div#players-ready').empty();
+        $('.welcome-screen').css('display', 'none');
+        $('.game-screen').css('display', 'block');
         start();
     });
 
     socketClient.on('sendChrono', function (data) {
         $('p.chrono span.seconds').html(data.time);
+        
     });
 
     //Questions
@@ -81,13 +84,13 @@ window.addEventListener('DOMContentLoaded', function () {
         freezeClick = false;
         console.log("TCL: data (question)", data);
         round = data.round;
-        $('p.chrono, p.score, p.question').show();
+        $('p.chrono, p.score, div.questions, p.question').show();
         $('span.questionNumber').html(data.questionNumber);
         $('span.question').html(data.question);
-        $('a#answer-a').html(data.answersTab[0]).css('background-color', 'white');
-        $('a#answer-b').html(data.answersTab[1]).css('background-color', 'white');
-        $('a#answer-c').html(data.answersTab[2]).css('background-color', 'white');
-        $('a#answer-d').html(data.answersTab[3]).css('background-color', 'white');
+        $('a#answer-a').html(data.answersTab[0]).css('background-color', '#E5BA44');
+        $('a#answer-b').html(data.answersTab[1]).css('background-color', '#E5BA44');
+        $('a#answer-c').html(data.answersTab[2]).css('background-color', '#E5BA44');
+        $('a#answer-d').html(data.answersTab[3]).css('background-color', '#E5BA44');
         $('p.littleStory').text('');
     });
 
@@ -112,7 +115,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
         $('p.littleStory').text(correction.littleStory)
         var answerRef = "#" + correction.answerRef;
-        $(answerRef).css('background-color', 'green');
+        $(answerRef).css('background-color', '#9FCF67');
         questionNumber++;
         setTimeout(function () {
             socketClient.emit('nextQuestion');
@@ -127,9 +130,9 @@ window.addEventListener('DOMContentLoaded', function () {
         console.log("TCL: correction", correction);
         $('p.littleStory').text(correction.littleStory)
         var answerRef = "#" + correction.answerRef;
-        $(answerRef).css('background-color', 'red');
+        $(answerRef).css('background-color','#CA5741');
         var goodAnswerRef = "#" + correction.goodAnswerRef;
-        $(goodAnswerRef).css('background-color', 'green');
+        $(goodAnswerRef).css('background-color', '#9FCF67');
         questionNumber++;
         setTimeout(function () {
             socketClient.emit('nextQuestion');
@@ -138,7 +141,9 @@ window.addEventListener('DOMContentLoaded', function () {
 
     //Arret du jeu
     socketClient.on('stopGame', function () {
-        $('span.question, p.littleStory, a.answer').html('');
+        $('div.questions').hide();
+        $('p.chrono, p.score, p.question, p.littleStory').hide();
+        // $('span.question, p.littleStory, a.answer').html('');
     });
     
     //Affichage du score final
@@ -149,9 +154,6 @@ window.addEventListener('DOMContentLoaded', function () {
         $('div.player2 p.pseudo').html(finalScores[1].player);
         $('div.player1 p.score-aff').html(finalScores[0].score);
         $('div.player2 p.score-aff').html(finalScores[1].score);
-        $('p.chrono, p.score, p.question').hide();
-        
-        
     });
 
 

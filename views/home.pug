@@ -1,26 +1,63 @@
 include includes/head.pug
 
-h2 Connection
+//- h2 Connection
 
 if messageLogin
     p.messageLogin.error #{messageLogin}
 
-form#login-form(action="/connexion/check" method="post")
-    div
-        label(for="login-id") Identifiant
-    div
-        input#login-id(type="text", name="login-id")
-    div
-        label(for="login-password") Mot de passe
+ul#myTab.nav.nav-tabs(role='tablist')
+    li.nav-item
+        a#home-tab.nav-link.active(data-toggle='tab' href='#connection' role='tab' aria-controls='connection' aria-selected='true') Connection
+    li.nav-item
+        a#profile-tab.nav-link(data-toggle='tab' href='#inscription' role='tab' aria-controls='inscription' aria-selected='false') Inscription
+
+#myTabContent.tab-content
+    #home.tab-pane.fade.show.active(role='tabpanel' aria-labelledby='connection-tab')
+        form#login-form(action="/connexion/check" method="post")
+            div
+                label(for="login-id") Identifiant
+            div
+                input#login-id(type="text", name="login-id")
+            div
+                label(for="login-password") Mot de passe
+                
+            div
+                input#login-password(type="password", name="login-password")
+            div
+            input(type="submit", value="Envoyer")
+    #profile.tab-pane.fade(role='tabpanel' aria-labelledby='inscription-tab')
+        form#signin-form(action="/inscription/check" method="post")
+            div
+                label(for="signin-id") Identifiant
+            div
+                input#signin-id(type="text", name="signin-id")
+                p.messageSignin
+            div
+                label(for="signin-password") Mot de passe
+                
+            div
+                input#signin-password(type="password", name="signin-password")
+                p.messageSignin
+            div
+                input(type="submit", value="Envoyer")
+
+
+//- form#login-form(action="/connexion/check" method="post")
+//-     div
+//-         label(for="login-id") Identifiant
+//-     div
+//-         input#login-id(type="text", name="login-id")
+//-     div
+//-         label(for="login-password") Mot de passe
         
-    div
-        input#login-password(type="password", name="login-password")
-    div
-        input(type="submit", value="Envoyer")
+//-     div
+//-         input#login-password(type="password", name="login-password")
+//-     div
+//-         input(type="submit", value="Envoyer")
 
-h2 Inscription
+//- h2 Inscription
 
-form#signin-form(action="/inscription/check" method="post")
+//- form#signin-form(action="/inscription/check" method="post")
     div
         label(for="signin-id") Identifiant
     div

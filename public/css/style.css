@@ -1,3 +1,51 @@
+body {
+    background-color: #FCF9D2;
+}
+
+h1 {
+    padding-bottom : 30px;
+}
+
+h2 {
+    text-align: center;
+}
+
+nav,
+footer {
+    background-color:#6C9686;
+}
+
+nav a {
+    color : #fff !important;
+    font-weight : bold;
+}
+
+section {
+    padding-top : 60px;
+}
+
+.btn {
+    background-color: #CA5741;
+    color : #fff;
+}
+
+.answer {
+    display : inline-block;
+    text-align : center;
+    width : 100%;
+}
+
+.game-screen p,
+.left p,
+.right p {
+    text-align : center;
+}
+
+.player1,
+.player2 {
+    text-align : center;
+}
+
 .error{
     color: #d0021b;
     background-color: rgba(208, 2, 27, 0.2);
@@ -9,3 +57,31 @@
     -o-border-radius: 5px 5px 5px 10px;
     padding : 5px;
 }
+
+/* .colonne {
+    height : 500px;
+} */
+.footer-class {
+    height: 150px;
+}
+
+.game-screen {
+    display :none;
+}
+
+/* .blue {
+    background-color:rgb(0, 153, 255);
+}
+.red {
+    background-color:rgb(240, 50, 16);
+}
+.pink {
+    background-color: rgb(179, 42, 138);
+} */
+
+/* Color Theme Swatches in Hex */
+.Pioneering---Culture-Trip-1-hex { color: #F23558; }
+.Pioneering---Culture-Trip-2-hex { color: #8C277B; }
+.Pioneering---Culture-Trip-3-hex { color: #4EA686; }
+.Pioneering---Culture-Trip-4-hex { color: #F2B84B; }
+.Pioneering---Culture-Trip-5-hex { color: #F2C3A7; }

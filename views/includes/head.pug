@@ -4,10 +4,23 @@ head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     meta(http-equiv="X-UA-Compatible", content="ie=edge")
+    link(rel='stylesheet' href='/public/vendors/bootstrap/css/bootstrap.min.css')
     link(rel="stylesheet", href="/public/css/style.css")
     script(src="/socket.io/socket.io.js")
     
     title #{title}
 body
-    h1 #{h1}
+header
+    .container-fluid
+        nav.row.navbar.navbar-expand-lg.navbar-light
+            a.navbar-brand.col-4(href='#') QUIZ CHALLENGE
+                img(src='' alt='')
+            button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
+                span.navbar-toggler-icon
+            #navbarText.collapse.navbar-collapse.offset-4.col-4
+                ul.navbar-nav.mr-auto
+                    li.nav-item
+                        a.nav-link(href='/mon-compte') Mon compte
+                    li.nav-item
+                        a.nav-link(href='/deconnexion') Déconnexion 
         

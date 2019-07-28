@@ -21,7 +21,7 @@ router.get('/quiz/accueil', function (req, res, next) {
 
             myCollection.find({}, {
                 projection : {_id : 0},
-                sort : {date : 1},
+                sort : {date : -1},
                 limit : 10
             }).toArray(function (err, documents) {
                 if (err) {
@@ -32,7 +32,6 @@ router.get('/quiz/accueil', function (req, res, next) {
                     if (documents.length === 0) {
                         console.log('Pas de match a affcicher pour le moement');
                     } else {
-                        console.log('data MATCHES ', documents[0].socres);
                         dataBox.scoresTab = documents;
                     }
                 }
