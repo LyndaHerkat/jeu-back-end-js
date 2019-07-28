@@ -9,6 +9,7 @@ let dataBox = {}; //on vide dataBox a chaque requete
 router.get('/', function(req, res, next){
     dataBox.title = "Page d'accueil";
     dataBox.h1 = 'Accueil';
+    dataBox.session = req.session;
     res.render('home', dataBox);
 });
 

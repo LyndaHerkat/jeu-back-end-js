@@ -3,25 +3,26 @@ include includes/head.pug
 
 section
     .container-fluid
-        .row.justify-content-center
-            h1 QUIZ CHALLENGE
+        .row.justify-content-center.col-4.offset-4
+            h1(alt="Super-quiz")
+                img(src='/public/img/logo-quiz.png' alt='logo-quiz')
         .row
             // Ecran accueil
-            .center.col-lg-6.col-12.col-xl-5.order-lg-2.colonne.welcome-screen.justify-content-center
+            .center.col-lg-6.col-12.col-xl-6.order-lg-2.colonne.welcome-screen.justify-content-center
                 h2 Bienvenue #{session.pseudo}
                 p Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde, libero! Dolorem et accusantium non assumenda commodi possimus animi esse atque suscipit. Optio ab vitae vel saepe fuga? Sapiente dolorum ipsam itaque quibusdam pariatur voluptas atque harum consequuntur saepe sit neque aliquam, facilis cum, id, rem libero nostrum optio nulla. Rem facilis voluptas hic doloremque cumque nulla natus repellat placeat iusto minus rerum qui quod eos ullam voluptate, ex eaque provident aut odit. Autem sunt saepe esse blanditiis alias exercitationem quae dolores doloribus a veritatis nihil laboriosam natus, recusandae modi voluptatem corporis officiis eligendi doloremque, quidem eveniet ex. Rerum, in blanditiis.
                 a.btn.btn-info.ready Rejoindre la partie
                 p.wait En attente d'un second joueur ...
 
             // Colonne joueurs
-            .right.col-lg-3.col-12.col-xl-2.offset-xl-1.order-lg-1.colonne
+            .left.col-lg-3.col-12.col-xl-2.offset-xl-1.order-lg-1.colonne
                 h2 Joueurs connectés
                 div#players-connected
                 h2 Joueurs en attente d'un adversaire
                 div#players-ready
 
             // Ecran jeu
-            .center.col-lg-6.col-12.col-xl-5.order-lg-2.colonne.game-screen.justify-content-center 
+            .center.col-lg-6.col-12.col-xl-6.order-lg-2.colonne.game-screen.justify-content-center 
                 h2 C'est parti !
                 .row.justify-content-center
                     p.count Début du Quiz dans 
@@ -75,14 +76,15 @@ section
 
         
             // Colonne scores
-            .left.col-lg-3.col-12.order-lg-3.colonne.red
+            .right.col-lg-3.col-12.col-xl-2.order-lg-3.colonne.red
                 h2 10 dernières parties
+                div.hall-of-fame
                 .script
                     each elmt in scoresTab
                         //- let date = elmt.date.toString();
                         .container-fluid
                         
-                        p #{elmt.date}
+                        p Date : #{elmt.date}
                         .row
                             .col-4
                                 p #{elmt.scores[0].player}
@@ -95,7 +97,12 @@ section
                                 p #{elmt.scores[0].score}
                             .col-4.offset-4
                                 p #{elmt.scores[1].score}
-
+                        hr
+//- .script
+//-     var tabScores = '#scoresTab';
+//-     tabScores.forEach(function(elmt){
+//-         $('div.hall-of-fame').append
+//-     });
 
 footer.footer-class
     .container-fluid

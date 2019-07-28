@@ -1,51 +1,35 @@
 body {
     background-color: #FCF9D2;
 }
-
 h1 {
     padding-bottom : 30px;
 }
-
 h2 {
     text-align: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
-
 nav,
 footer {
-    background-color:#6C9686;
+    background-color:#7ecccc;
 }
-
 nav a {
     color : #fff !important;
     font-weight : bold;
 }
 
+.navbar-brand img {
+    height : 85px;
+}
 section {
-    padding-top : 60px;
+    padding : 60px 0;
 }
-
 .btn {
-    background-color: #CA5741;
-    color : #fff;
+    background-color: #F60306;
+    color : #fff !important;
 }
 
-.answer {
-    display : inline-block;
-    text-align : center;
-    width : 100%;
-}
-
-.game-screen p,
-.left p,
-.right p {
-    text-align : center;
-}
-
-.player1,
-.player2 {
-    text-align : center;
-}
-
+/*Page Connection*/
 .error{
     color: #d0021b;
     background-color: rgba(208, 2, 27, 0.2);
@@ -57,17 +41,53 @@ section {
     -o-border-radius: 5px 5px 5px 10px;
     padding : 5px;
 }
-
-/* .colonne {
-    height : 500px;
-} */
-.footer-class {
-    height: 150px;
+.home-container {
+    height: calc(100vh - 160px);
+    padding-top : 100px;
 }
 
+.form-container {
+    width : 242px;
+    background-color: #fff;
+    padding : 10px;
+}
+/*Page Game*/
+h1 img {
+    width : 300px;
+    height :auto;
+}
+
+.answer {
+    display : inline-block;
+    text-align : center;
+    width : 100%;
+}
+
+.left,
+.right {
+    text-align: center;
+    border: #7ecccc solid 1px;
+    background: rgba(126,204,204,0.39);
+}
+.game-screen p,
+.player1,
+.player2 {
+    text-align : center;
+}
+.right p {
+    margin-bottom : 0;
+}
 .game-screen {
     display :none;
 }
+
+/*Footer*/
+
+.footer-class {
+    height: 100px;
+}
+
+
 
 /* .blue {
     background-color:rgb(0, 153, 255);

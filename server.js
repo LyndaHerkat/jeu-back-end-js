@@ -412,8 +412,11 @@ io.on('connection', function (socketServer) {
         // enregistrement du score du match en base de données (collection games)
         
         if (roomsList[socketServer.room].scores.length === 2) { //un seul joueur fait cette requete ET si les scores des 2 joueurs sont disponibles
+
+            let date = new Date();
+            let dateString = date.toISOString().slice(0,10);
             let records = {
-                date: new Date(),
+                date: dateString,
                 scores: roomsList[socketServer.room].scores
             }
     

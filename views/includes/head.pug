@@ -13,14 +13,16 @@ body
 header
     .container-fluid
         nav.row.navbar.navbar-expand-lg.navbar-light
-            a.navbar-brand.col-4(href='#') QUIZ CHALLENGE
-                img(src='' alt='')
+            a.navbar-brand.col-4(href='#')
+                img(src='/public/img/logo-quiz.png' alt='logo-quiz')
             button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbarText' aria-controls='navbarText' aria-expanded='false' aria-label='Toggle navigation')
                 span.navbar-toggler-icon
             #navbarText.collapse.navbar-collapse.offset-4.col-4
-                ul.navbar-nav.mr-auto
-                    li.nav-item
-                        a.nav-link(href='/mon-compte') Mon compte
-                    li.nav-item
-                        a.nav-link(href='/deconnexion') Déconnexion 
+                .script
+                    if(!{session} != undefined)
+                        ul.navbar-nav.mr-auto
+                            li.nav-item
+                                a.nav-link(href='/mon-compte') Mon compte
+                            li.nav-item
+                                a.nav-link(href='/deconnexion') Déconnexion 
         
