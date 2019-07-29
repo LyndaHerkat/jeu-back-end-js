@@ -206,7 +206,7 @@ io.on('connection', function (socketServer) {
 
     //Lancement du chrono
     let timer;
-    let seconds = 40;
+    let seconds = 300;
     let secondsToHms = function(d){
         d = Number(d);
         var h = Math.floor(d / 3600);
@@ -351,7 +351,7 @@ io.on('connection', function (socketServer) {
             socketServer.emit('wrongAnswer', correction);
         }
         questionNumber++;
-        if (questionNumber === 2) {//11
+        if (questionNumber === 11) {//11
             questionNumber = 1;
             roundNumber++;
         }
