@@ -123,9 +123,6 @@ window.addEventListener('DOMContentLoaded', function () {
     });
 
     socketClient.on('wrongAnswer', function (correction) {
-        // $('span.question p').on('mouseover', function(){
-        //     $('a.answer').off('click');
-        // });
         freezeClick = true;
         console.log("TCL: correction", correction);
         $('p.littleStory').text(correction.littleStory)
@@ -140,9 +137,13 @@ window.addEventListener('DOMContentLoaded', function () {
     });
 
     //Arret du jeu
+    socketClient.on('Preumsss', function(){
+        socketClient.emit('onStoppeTout');
+    });
     socketClient.on('stopGame', function () {
         $('div.questions').hide();
         $('p.chrono, p.score, p.question, p.littleStory').hide();
+        socketClient.emit('stopChrono');
         // $('span.question, p.littleStory, a.answer').html('');
     });
     

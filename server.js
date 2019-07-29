@@ -206,7 +206,7 @@ io.on('connection', function (socketServer) {
 
     //Lancement du chrono
     let timer;
-    let seconds = 300;
+    let seconds = 40;
     let secondsToHms = function(d){
         d = Number(d);
         var h = Math.floor(d / 3600);
@@ -221,18 +221,20 @@ io.on('connection', function (socketServer) {
     let chrono = function () {
         timer = setInterval(function () {
             seconds -= 1;
+            console.log("TCL: timer -> seconds",player_username, seconds)
             if (seconds >= 0) {
                 io.to(socketServer.room).emit('sendChrono', {
                     time: secondsToHms(seconds)
                 });
             } else {
-                stopGameSwitcher = true;
+                stopGameSwitcher = true;//variable permettant de stopper l'envoi de questions
                 stopChrono();
                 stopGame();
             }
         }, 1000);
     };
     let stopChrono = function () {
+        console.log('On arrete le chrono');
         clearInterval(timer);
     };
     socketServer.on('askChrono', function () {
@@ -294,16 +296,15 @@ io.on('connection', function (socketServer) {
     };
 
     socketServer.on('nextQuestion', function () {
-        console.log('next question pleeeeeeaaaase !!!');
-        console.log('questionNumber', questionNumber);
-        console.log('roundNumber', roundNumber);
-        console.log('roundText', roundText);
         if (stopGameSwitcher === false) {
+            console.log('next question pleeeeeeaaaase !!!');
+            console.log('questionNumber', questionNumber);
+            console.log('roundText', roundText);
             socketServer.emit('startQuestions', getQuestion());
         }
     });
 
-    //Verification reponse
+    //Vérification reponse
     socketServer.on('checkAnswer', function (answerToCheck) {
         correction.answerRef = answerToCheck.id;
         correction.littleStory = roomsList[socketServer.room][roundText][questionNumber - 1].anecdote;
@@ -334,10 +335,7 @@ io.on('connection', function (socketServer) {
             correction.result = 'right';
             console.log("TCL: correction right answer", correction)
             playersAvailable.forEach(function (elmt) {
-                console.log("TCL: socketServer.request.session.ioID", socketServer.request.session.ioID)
                 for (var [key, value] of Object.entries(elmt)) {
-                    console.log("TCL: key", key)
-                    console.log("TCL: value", value)
                     if (value === socketServer.request.session.ioID) {
                         elmt.score++;
                         correction.score = elmt.score;
@@ -345,7 +343,6 @@ io.on('connection', function (socketServer) {
                         socketServer.emit('rightAnswer', correction);
                     }
                 }
-                console.log("TCL: elmt", elmt)
             });
         } else {
             console.log('bouuuuhhhh');
@@ -354,7 +351,7 @@ io.on('connection', function (socketServer) {
             socketServer.emit('wrongAnswer', correction);
         }
         questionNumber++;
-        if (questionNumber === 11) {//11
+        if (questionNumber === 2) {//11
             questionNumber = 1;
             roundNumber++;
         }
@@ -362,13 +359,17 @@ io.on('connection', function (socketServer) {
             roundText = roundText = 'quizzRound' + roundNumber;
         }
         if (roundNumber > 3){
-            stopGameSwitcher = true;
-            stopChrono();
-            stopGame();
+            io.to(socketServer.room).emit('Preumsss');
         }
     });
+
+    //Arret du quiz
+    socketServer.on('onStoppeTout', function(){
+        stopGameSwitcher = true;//variable permettant de stopper l'envoi de questions
+        stopGame();
+        clearInterval(timer);
+    });
     let stopGame = function () {
-        console.log("TCL: stopGame -> roomsList[pending_room]", roomsList[pending_room])
 
         // enregistrement du score perso en base de données (collection users)
         playersAvailable.forEach(function (elmt) {
@@ -388,10 +389,10 @@ io.on('connection', function (socketServer) {
                             console.log('Impossible de se connecter au client Mongo');
                             next(err);
                         } else {
-                            let date = new Date();
-                            let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                            let dateString = date.toLocaleDateString('fr-FR', options);
-                            console.log("TCL: stopGame -> dateString", dateString)
+                            // let date = new Date();
+                            // let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                            // let dateString = date.toLocaleDateString('fr-FR', options);
+                            // console.log("TCL: stopGame -> dateString", dateString);
                             const myDb = dbTools.getClientMongo().db('users');
                             const myCollection = myDb.collection('credentials');
                             myCollection.findOneAndUpdate({
@@ -399,7 +400,7 @@ io.on('connection', function (socketServer) {
                             }, {
                                 $push: {
                                     scores: {
-                                        date: dateString,
+                                        date: new Date(),
                                         score: finalScore
                                     }
                                 }
@@ -409,8 +410,8 @@ io.on('connection', function (socketServer) {
                 }
             }
         });
-        // enregistrement du score du match en base de données (collection games)
-        
+
+        // enregistrement du score du match en base de données (collection games)       
         if (roomsList[socketServer.room].scores.length === 2) { //un seul joueur fait cette requete ET si les scores des 2 joueurs sont disponibles
 
             let date = new Date();
@@ -418,7 +419,7 @@ io.on('connection', function (socketServer) {
             let records = {
                 date: dateString,
                 scores: roomsList[socketServer.room].scores
-            }
+            };
     
             dbTools.connectClientMongo(dbTools.URI, {
                 useNewUrlParser: true
