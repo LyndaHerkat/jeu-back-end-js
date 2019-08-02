@@ -9,6 +9,9 @@ h2 {
     padding-top: 20px;
     padding-bottom: 20px;
 }
+li {
+    list-style: none;
+}
 nav,
 footer {
     background-color:#7ecccc;

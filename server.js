@@ -189,6 +189,7 @@ io.on('connection', function (socketServer) {
         if (playersReadyToPlayList.length === 2) {
             //Debut de l'echange dans la room
             io.to(socketServer.room).emit('letsgo');
+            
 
             // remise à zero du tableau des joueurs en attente de joueur 
             pending_room = null;
@@ -206,7 +207,7 @@ io.on('connection', function (socketServer) {
 
     //Lancement du chrono
     let timer;
-    let seconds = 300;
+    let seconds = 30;
     let secondsToHms = function(d){
         d = Number(d);
         var h = Math.floor(d / 3600);
@@ -243,6 +244,7 @@ io.on('connection', function (socketServer) {
 
     //Récupération du Quiz dans la base de données(choix aléatoire de la collection)
     socketServer.on('startQuestions', function () {
+        stopGameSwitcher = false;
         if (roomsList[socketServer.room].players[0] === player_username) { //un seul joueur fait cette requete
             dbTools.connectClientMongo(dbTools.URI, {
                 useNewUrlParser: true
@@ -351,7 +353,7 @@ io.on('connection', function (socketServer) {
             socketServer.emit('wrongAnswer', correction);
         }
         questionNumber++;
-        if (questionNumber === 11) {//11
+        if (questionNumber === 2) {//11
             questionNumber = 1;
             roundNumber++;
         }
@@ -359,6 +361,7 @@ io.on('connection', function (socketServer) {
             roundText = roundText = 'quizzRound' + roundNumber;
         }
         if (roundNumber > 3){
+            console.log("TCL: Preumsss", roundNumber,  questionNumber)
             io.to(socketServer.room).emit('Preumsss');
         }
     });
@@ -370,6 +373,13 @@ io.on('connection', function (socketServer) {
         clearInterval(timer);
     });
     let stopGame = function () {
+        //on remet le compteur a 300 pour une prochaine partie
+        seconds = 30;
+        questionNumber = 1;
+        roundNumber = 1;
+        roundText = 'quizzRound' + roundNumber;
+        correction = {};
+        // stopGameSwitcher = false;
 
         // enregistrement du score perso en base de données (collection users)
         playersAvailable.forEach(function (elmt) {
@@ -405,6 +415,8 @@ io.on('connection', function (socketServer) {
                                     }
                                 }
                             });
+                            //Remise à 0 du score
+                            elmt.score = 0;
                         }
                     });
                 }
@@ -415,7 +427,8 @@ io.on('connection', function (socketServer) {
         if (roomsList[socketServer.room].scores.length === 2) { //un seul joueur fait cette requete ET si les scores des 2 joueurs sont disponibles
 
             let date = new Date();
-            let dateString = date.toISOString().slice(0,10);
+            let dateString = date.toISOString();
+            // .slice(0,10);
             let records = {
                 date: dateString,
                 scores: roomsList[socketServer.room].scores
@@ -437,6 +450,7 @@ io.on('connection', function (socketServer) {
                             dbTools.closeClientMongo();
                             next(err);
                         } else {
+                            let finalScoreTab = [];
                             io.to(socketServer.room).emit('finalScore', roomsList[socketServer.room].scores);
                         }
                         dbTools.closeClientMongo();

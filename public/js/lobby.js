@@ -22,6 +22,8 @@ window.addEventListener('DOMContentLoaded', function () {
     //Click Rejoindre une partie lobby
     $('a.ready').click(function (e) {
         e.preventDefault();
+        $('.welcome-screen').css('display', 'block');
+        $('.game-screen').css('display', 'none');
         socketClient.emit('ready');
     });
 
@@ -47,35 +49,44 @@ window.addEventListener('DOMContentLoaded', function () {
         clearInterval(clearCounter);
     };
     var count = function () {
+        console.log('entrée dans la fonction count()');
         counter--;
-        if (counter === 0) {
+        console.log("TCL: count -> counter", counter)
+        if (counter <= 0) {
+            console.log('entrée dans la fonction count() condition if counter === 0');
             finish();
-            $('p.count').html('GO');
+            $('p.count span.message').empty();
             socketClient.emit('askChrono');
             socketClient.emit('startQuestions');
         } else {
+            console.log('entrée dans la fonction count() condition if counter != 0');
             $('span.count').html(counter);
         }
     };
-
+    
     var start = function () {
+        console.log('entrée dans la fonction start()');
         clearCounter = setInterval(count, 1000);
     };
-
+    
     socketClient.on('letsgo', function () {
+        console.log('entrée dans la socketClient.on letsgo');
+        $('div.final-score').hide();
         $('p.wait, a.ready').hide();
-        $('p.count').show();
+        $('p.count, p.littleStory').show();
         $('div#players-ready').empty();
         $('.welcome-screen').css('display', 'none');
         $('.game-screen').css('display', 'block');
+        $('span.score').html('0');
+        $('p.count span.message').html('Début du Quiz dans ');
+        $('p.count span.unity').html(' s');
         start();
     });
-
+    
     socketClient.on('sendChrono', function (data) {
         $('p.chrono span.seconds').html(data.time);
-        
     });
-
+    
     //Questions
     var questionNumber = 1;
     var round = 1;
@@ -84,6 +95,7 @@ window.addEventListener('DOMContentLoaded', function () {
         freezeClick = false;
         console.log("TCL: data (question)", data);
         round = data.round;
+        $('p.count span.message, p.count span.count, p.count span.unity').empty();
         $('p.chrono, p.score, div.questions, p.question').show();
         $('span.questionNumber').html(data.questionNumber);
         $('span.question').html(data.question);
@@ -142,8 +154,10 @@ window.addEventListener('DOMContentLoaded', function () {
     });
     socketClient.on('stopGame', function () {
         $('div.questions').hide();
+        $('p.littleStory').empty();
         $('p.chrono, p.score, p.question, p.littleStory').hide();
         socketClient.emit('stopChrono');
+        counter = 6;
         // $('span.question, p.littleStory, a.answer').html('');
     });
     
@@ -151,6 +165,7 @@ window.addEventListener('DOMContentLoaded', function () {
     socketClient.on('finalScore', function(finalScores){
         console.log("TCL: finalScores", finalScores);
         $('div.final-score').show();
+        $('div.final-score a.ready').show();
         $('div.player1 p.pseudo').html(finalScores[0].player);
         $('div.player2 p.pseudo').html(finalScores[1].player);
         $('div.player1 p.score-aff').html(finalScores[0].score);

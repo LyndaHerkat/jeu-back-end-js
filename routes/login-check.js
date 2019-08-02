@@ -35,6 +35,16 @@ router.post('/connexion/check', function (req, res, next) {
                         dataBox.messageLogin = "Ce compte n'existe pas. Veuillez entrer des identifiants corrects ou créer un nouveau compte";
                         res.render('home', dataBox);
                     } else {
+                        // const myCollection2 = myDb.collection('games');
+                        // myCollection2.find({}, {session : 1, _id : 0}).toArray(function(err, documents){
+                        //     if (err){
+                        //         console.log('Impossible de se connecter au client Mongo');
+                        //         next(err);
+                        //     } else {
+                        //         console.log(documents);
+                        //     }
+                        // });
+
                         // ajout des _id et nom du joueur dans la session
                         req.session.user_id = documents[0]._id;
                         req.session.pseudo = documents[0].pseudo;
