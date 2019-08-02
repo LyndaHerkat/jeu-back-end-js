@@ -207,7 +207,7 @@ io.on('connection', function (socketServer) {
 
     //Lancement du chrono
     let timer;
-    let seconds = 30;
+    let seconds = 300;
     let secondsToHms = function(d){
         d = Number(d);
         var h = Math.floor(d / 3600);
@@ -353,7 +353,7 @@ io.on('connection', function (socketServer) {
             socketServer.emit('wrongAnswer', correction);
         }
         questionNumber++;
-        if (questionNumber === 2) {//11
+        if (questionNumber === 11) {//11
             questionNumber = 1;
             roundNumber++;
         }
@@ -374,7 +374,7 @@ io.on('connection', function (socketServer) {
     });
     let stopGame = function () {
         //on remet le compteur a 300 pour une prochaine partie
-        seconds = 30;
+        seconds = 300;
         questionNumber = 1;
         roundNumber = 1;
         roundText = 'quizzRound' + roundNumber;
