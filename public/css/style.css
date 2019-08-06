@@ -55,6 +55,20 @@ section {
     padding : 10px;
 }
 /*Page Game*/
+h1 {
+    border: solid 2px #F60306;
+    box-shadow:
+        0 0 10px #fff,
+        0 0 0 15px #F60306;
+    /* border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    -webkit-border-radius: 5px; */
+    padding: 0;
+}
+
 h1 img {
     width : 300px;
     height :auto;
@@ -70,7 +84,20 @@ h1 img {
 .right {
     text-align: center;
     border: #7ecccc solid 1px;
-    background: rgba(126,204,204,0.39);
+    background: rgba(126,204,204,1);
+    border: solid 2px #F60306;
+    /* border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    -webkit-border-radius: 5px; */
+    box-shadow:
+        0 0 10px #fff,
+        0 0 0 15px #F60306;
+}
+.center {
+    padding: 40px;
 }
 .game-screen p,
 .player1,
